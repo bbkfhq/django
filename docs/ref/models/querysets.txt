@@ -2956,6 +2956,19 @@ Using ``update()`` also prevents a race condition wherein something might
 change in your database in the short period of time between loading the object
 and calling ``save()``.
 
+.. admonition:: MySQL users
+
+    MySQL users should be aware that in some cases ``update()``
+    will be performed using two separate SQL queries (a ``SELECT`` followed by an ``UPDATE``)
+    which is subject to race conditions.
+
+    This happens when the ``QuerySet`` that is being updated includes references to other models.
+    For example, when the ``QuerySet`` has a filter condition that references an associated model.
+
+    In those cases, consider using row-level locking (:meth:`~.QuerySet.select_for_update()`)
+    with explicit transaction management (:func:`~django.db.transaction.atomic()`) instead.
+
+
 Finally, realize that ``update()`` does an update at the SQL level and, thus,
 does not call any ``save()`` methods on your models, nor does it emit the
 :attr:`~django.db.models.signals.pre_save` or
